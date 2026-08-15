@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  type      String // "SEM" | "DSA"
+  platform  String   @default("google_ads") // "google_ads" | "meta" | "tiktok" | "snapchat"
+  region    String
+  status    String   @default("Active")
+  createdAt DateTime @default(now())
+
+  adGroups     AdGroup[]
+  sitelinks    Sitelink[]
+  dailyMetrics DailyMetric[]
+}
+
+model AdGroup {
+  id         String  @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  name       String
+  adScore    String? // "Excellent" | null
+  impressions Int    @default(0)
+  clicks      Int    @default(0)
+  ctr         Float  @default(0)
+  spend       Float  @default(0)
+  avgCpc      Float  @default(0)
+  selfBidPrice Float @default(0)
+
+  keywords     Keyword[]
+  dailyMetrics DailyMetric[]
+  productRois  ProductRoi[]
+}
+
+model DailyMetric {
+  id         String   @id @default(cuid())
+  date       DateTime
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id])
+  adGroupId  String?
+  adGroup    AdGroup?  @relation(fields: [adGroupId], references: [id])
+  spend       Float @default(0)
+  impressions Int   @default(0)
+  clicks      Int   @default(0)
+  ctr         Float @default(0)
+  avgCpc      Float @default(0)
+}
+
+model Keyword {
+  id              String  @id @default(cuid())
+  adGroupId       String
+  adGroup         AdGroup @relation(fields: [adGroupId], references: [id])
+  text            String
+  matchType       String  @default("PHRASE")
+  qualityScore    Int?
+  estCtr          String? // "Above average" | "Below average" | "Average"
+  adRelevance     String?
+  landingPageExp  String?
+  status          String  @default("Active")
+  impressions     Int     @default(0)
+  clicks          Int     @default(0)
+  ctr             Float   @default(0)
+  spend           Float   @default(0)
+  avgCpc          Float   @default(0)
+  convRate        Float   @default(0)
+  currentBid      Float   @default(0)
+  intent          String? // "transactional" | "commercial" | "informational" | "navigational"
+  source          String? // "claude" | "serp_autocomplete" | "serp_related" | "serp_paa"
+  notes           String?
+  updatedAt       DateTime @updatedAt
+}
+
+model Sitelink {
+  id          String   @id @default(cuid())
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  title       String
+  description String
+  url         String
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model TokenUsageLog {
+  id               String   @id @default(cuid())
+  product          String
+  groupCount       Int      @default(1)
+  feature          String // "keyword" | "sitelink" | "other"
+  promptTokens     Int
+  completionTokens Int
+  totalTokens      Int
+  createdAt        DateTime @default(now())
+}
+
+model AffiliateOrder {
+  id             String   @id @default(cuid())
+  ticketId       String   @unique
+  product        String
+  adGroupName    String?
+  orderDate      DateTime
+  grossCommission Float
+  netCommission   Float
+  refunded        Boolean @default(false)
+  importBatch     String
+  createdAt       DateTime @default(now())
+}
+
+model ProductRoi {
+  id             String   @id @default(cuid())
+  month          String // "2026-08"
+  product        String
+  ticketId       String
+  adGroupId      String?
+  adGroup        AdGroup? @relation(fields: [adGroupId], references: [id])
+  adGroupName    String
+  semClicks      Int      @default(0)
+  semSpend       Float    @default(0)
+  orders         Int      @default(0)
+  refunds        Int      @default(0)
+  grossCommission Float   @default(0)
+  netCommission   Float   @default(0)
+  roi            Float    @default(0)
+  netRoi         Float    @default(0)
+  adType         String // "SEM" | "DSA"
+}
+
+model ImageAsset {
+  id         String   @id @default(cuid())
+  fileName   String
+  url        String
+  tags       String // comma separated
+  campaign   String?
+  width      Int?
+  height     Int?
+  sizeKb     Int?
+  uploadedAt DateTime @default(now())
+}
+
+model HealthCheckItem {
+  id          String   @id @default(cuid())
+  category    String
+  name        String
+  status      String // "good" | "warning" | "critical"
+  score       Int
+  description String
+  suggestion  String?
+  checkedAt   DateTime @default(now())
+}
+
+model ReviewStatus {
+  id         String   @id @default(cuid())
+  type       String // "ad" | "keyword" | "extension"
+  name       String
+  campaign   String
+  adGroup    String?
+  status     String // "In Review" | "Approved" | "Disapproved" | "Limited"
+  reason     String?
+  updatedAt  DateTime @default(now())
+}
+
+model KeywordIdea {
+  id            String   @id @default(cuid())
+  seedTerm      String
+  suggestion    String
+  avgMonthlySearch Int
+  competition   String // "Low" | "Medium" | "High"
+  suggestedBid  Float
+  addedToGroup  String?
+  createdAt     DateTime @default(now())
+}

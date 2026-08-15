@@ -1,69 +1,138 @@
-import Image from "next/image";
+import Link from "next/link";
+import {
+  BarChart3,
+  Image as ImageIcon,
+  KeyRound,
+  Layers,
+  ListChecks,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { Badge, Card, KpiCard, PageTitle } from "@/components/ui";
+import { fmtDecimal, fmtInt, fmtUSD } from "@/lib/format";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+const PLATFORM_LABEL: Record<string, string> = {
+  google_ads: "Google Ads",
+  meta: "Meta",
+  tiktok: "TikTok",
+  snapchat: "Snapchat",
+};
+
+export default async function DashboardPage() {
+  const [
+    campaignCount,
+    adGroupCount,
+    keywordCount,
+    daily,
+    tokenAgg,
+    tokenCount,
+    latestRoi,
+    healthItems,
+    pendingReview,
+    campaignsByPlatform,
+  ] = await Promise.all([
+    prisma.campaign.count(),
+    prisma.adGroup.count(),
+    prisma.keyword.count(),
+    prisma.dailyMetric.findMany({ orderBy: { date: "desc" }, take: 7 }),
+    prisma.tokenUsageLog.aggregate({ _sum: { totalTokens: true } }),
+    prisma.tokenUsageLog.count(),
+    prisma.productRoi.findMany({ where: { month: "2026-08" } }),
+    prisma.healthCheckItem.findMany(),
+    prisma.reviewStatus.count({ where: { status: "In Review" } }),
+    prisma.campaign.groupBy({ by: ["platform"], _count: { _all: true } }),
+  ]);
+
+  const weekSpend = daily.reduce((s, d) => s + d.spend, 0);
+  const weekClicks = daily.reduce((s, d) => s + d.clicks, 0);
+  const roiSpend = latestRoi.reduce((s, r) => s + r.semSpend, 0);
+  const roiCommission = latestRoi.reduce((s, r) => s + r.netCommission, 0);
+  const roi = roiSpend ? roiCommission / roiSpend : 0;
+  const avgHealth = healthItems.length
+    ? Math.round(healthItems.reduce((s, h) => s + h.score, 0) / healthItems.length)
+    : 0;
+
+  const modules = [
+    { href: "/performance", icon: BarChart3, title: "Performance", desc: "Impressions, clicks, spend trends, and ad group rankings" },
+    { href: "/keyword-quality", icon: Search, title: "Keyword Quality", desc: "Quality Score and AI-generated keywords" },
+    { href: "/sitelinks", icon: Layers, title: "Sitelinks", desc: "One-click AI generation, drag to reorder" },
+    { href: "/image-assets", icon: ImageIcon, title: "Image Assets", desc: "Ad creative image library" },
+    { href: "/token-usage", icon: Sparkles, title: "Token Usage", desc: "LLM call counts and token consumption" },
+    { href: "/health-check", icon: ShieldCheck, title: "Health Check", desc: "Account structure, keyword, and landing page audits" },
+    { href: "/keyword-planning", icon: KeyRound, title: "Keyword Planning", desc: "Seed term expansion and bid suggestions" },
+    { href: "/review-status", icon: ListChecks, title: "Review Status", desc: "Ad / keyword / asset review tracking" },
+    { href: "/klook-roi", icon: TrendingUp, title: "ROI", desc: "Affiliate performance comparison and automated DSA optimization" },
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div>
+      <PageTitle
+        title="Dashboard"
+        subtitle="An LLM-powered ad ops platform — one-click optimization, copy fill, keyword fill, image sourcing, and ROI optimization all in one place"
+      />
+
+      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <KpiCard label="Spend (7 days)" value={fmtUSD(weekSpend)} />
+        <KpiCard label="Clicks (7 days)" value={fmtInt(weekClicks)} />
+        <KpiCard
+          label="ROI this month"
+          value={fmtDecimal(roi)}
+          valueClassName={roi >= 1 ? "text-emerald-600" : "text-amber-600"}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+        <KpiCard
+          label="Account health score"
+          value={String(avgHealth)}
+          valueClassName={avgHealth >= 80 ? "text-emerald-600" : "text-amber-600"}
+        />
+      </div>
+
+      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <KpiCard label="Campaigns" value={fmtInt(campaignCount)} />
+        <KpiCard label="Ad groups" value={fmtInt(adGroupCount)} />
+        <KpiCard label="Keywords" value={fmtInt(keywordCount)} />
+        <KpiCard label="Pending review" value={fmtInt(pendingReview)} valueClassName="text-amber-600" />
+      </div>
+
+      <Card className="mb-4">
+        <div className="mb-2 flex items-center justify-between text-xs text-gray-500">
+          <span>Connected ad platforms</span>
+          <span className="text-gray-400">More platforms coming soon</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="flex flex-wrap gap-2">
+          {campaignsByPlatform.map((p) => (
+            <Badge key={p.platform} tone="blue">
+              {PLATFORM_LABEL[p.platform] ?? p.platform} · {p._count._all}
+            </Badge>
+          ))}
         </div>
-      </main>
+      </Card>
+
+      <Card className="mb-4">
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <span>Total LLM generations</span>
+          <span className="font-medium text-gray-800">
+            {fmtInt(tokenCount)} calls · {fmtInt(tokenAgg._sum.totalTokens ?? 0)} tokens
+          </span>
+        </div>
+      </Card>
+
+      <h2 className="mb-3 text-sm font-semibold text-gray-700">Modules</h2>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {modules.map((m) => (
+          <Link key={m.href} href={m.href}>
+            <Card className="h-full transition-shadow hover:shadow-md">
+              <m.icon size={20} className="mb-2 text-blue-600" />
+              <div className="text-sm font-semibold text-gray-900">{m.title}</div>
+              <div className="mt-0.5 text-xs text-gray-500">{m.desc}</div>
+            </Card>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
