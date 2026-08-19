@@ -7,7 +7,7 @@ Multi-platform 廣告投放管理儀表板 — Campaign / Ad Group 命名盤點�
 ## Stack
 
 - Next.js (App Router) + TypeScript + Tailwind
-- Prisma + SQLite（本地開發用；正式環境需換成 hosted DB，見下方「部署」）
+- Prisma + PostgreSQL
 - Anthropic API（AI 生成關鍵字 / Sitelinks，選用）
 - SerpApi（關鍵字建議，選用）
 
@@ -15,7 +15,8 @@ Multi-platform 廣告投放管理儀表板 — Campaign / Ad Group 命名盤點�
 
 ```bash
 npm install
-cp .env.example .env   # 沒有的欄位可先留空，會 fallback 成 mock 資料
+cp .env.example .env
+# DATABASE_URL 需要一個真的 Postgres 連線字串，例如 npx create-db 免費建一個 hosted Postgres
 npx prisma db push
 npm run db:seed
 npm run dev
@@ -38,14 +39,9 @@ npm run dev
 ## 部署（Vercel）
 
 1. 到 [vercel.com/new](https://vercel.com/new) 匯入這個 repo。
-2. 在 Project Settings → Environment Variables 設定上表中的變數。
-3. **資料庫**：這個專案目前用本地 SQLite 檔案（`prisma/schema.prisma` 的 `datasource` 是 `sqlite`，`DATABASE_URL` 預設指到 `file:./dev.db`）。Vercel 的 serverless function 檔案系統是唯讀（`/tmp` 雖可寫但不會在多次呼叫間保留），**直接部署會導致寫入資料在下一次請求就消失**。正式上線前需要：
-   - 把 `prisma/schema.prisma` 的 `provider` 換成 `postgresql`（或其他 hosted DB），
-   - 申請一個 hosted Postgres（例如 Prisma Postgres：`npx create-db`、或 Neon / Supabase），
-   - 把新的連線字串設進 Vercel 的 `DATABASE_URL`，
-   - `npx prisma migrate deploy` 建表。
-4. Build command 用預設的 `next build` 即可（`package.json` 已內建）。
-5. Push 到 `main` 後 Vercel 會自動部署。
+2. 在 Project Settings → Environment Variables 設定上表中的變數，`DATABASE_URL` 指向你的正式 Postgres（開發用的 `npx create-db` 資料庫是 24 小時內會過期的臨時庫，記得到它的 claim URL 領取才會變永久，正式環境建議另外開一個）。
+3. Build command 用預設的 `next build` 即可（`package.json` 已內建）；`npx prisma db push` 或 `npx prisma migrate deploy` 需要先對正式資料庫跑過一次建表。
+4. Push 到 `main` 後 Vercel 會自動部署。
 
 ## Learn More
 
