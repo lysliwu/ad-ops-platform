@@ -34,9 +34,17 @@ model AdGroup {
   avgCpc      Float  @default(0)
   selfBidPrice Float @default(0)
 
+  // Naming convention audit — [Time] [Temp] [Audience] [Exclusion] [Product]
+  timeWindow   String? // e.g. "17-24", "All day"
+  audienceTemp String? // "New" | "Returning" | "Hot (viewed, no purchase)"
+  audienceDef  String? // e.g. "LL1% purchasers", "Warm-pool 6-pack"
+  exclusion    String? // "Exclude 30d purchasers" | "Exclude warm-pool (6-pack)" | "No exclusion"
+  productTag   String? // e.g. "Chicken Leg (angle variant)"
+
   keywords     Keyword[]
   dailyMetrics DailyMetric[]
   productRois  ProductRoi[]
+  searchTerms  SearchTermReport[]
 }
 
 model DailyMetric {
@@ -175,4 +183,56 @@ model KeywordIdea {
   suggestedBid  Float
   addedToGroup  String?
   createdAt     DateTime @default(now())
+}
+
+// Official site (own e-commerce backend) — order reconciliation, product
+// sales, abandoned-cart recovery, inventory. Populated by src/lib/officialSite.ts,
+// which syncs from a real API when OFFICIAL_SITE_API_URL is set, otherwise
+// generates deterministic mock data so the UI works without a live backend.
+model StoreOrder {
+  id            String   @id @default(cuid())
+  orderNumber   String   @unique
+  orderDate     DateTime
+  amount        Float
+  status        String // "Paid" | "Unpaid" | "Refunded" | "Cancelled"
+  paymentMethod String // "Credit Card" | "Line Pay" | "ATM Transfer" | "Cash on Delivery"
+  recoverySent  Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  items StoreOrderItem[]
+}
+
+model StoreOrderItem {
+  id        String     @id @default(cuid())
+  orderId   String
+  order     StoreOrder @relation(fields: [orderId], references: [id])
+  product   String
+  quantity  Int
+  unitPrice Float
+}
+
+model StoreInventory {
+  id        String   @id @default(cuid())
+  product   String   @unique
+  stock     Int
+  updatedAt DateTime @updatedAt
+}
+
+// Search Term Report — actual user queries that triggered an ad, distinct
+// from the targeted Keyword rows. Populated by src/lib/googleAds.ts, which
+// calls the real Google Ads API when GOOGLE_ADS_DEVELOPER_TOKEN is set,
+// otherwise generates mock terms so the UI works without a live account.
+model SearchTermReport {
+  id             String   @id @default(cuid())
+  adGroupId      String
+  adGroup        AdGroup  @relation(fields: [adGroupId], references: [id])
+  term           String
+  matchedKeyword String? // keyword text that triggered the match, if any
+  impressions    Int      @default(0)
+  clicks         Int      @default(0)
+  cost           Float    @default(0)
+  conversions    Int      @default(0)
+  addedAsKeyword Boolean  @default(false)
+  excluded       Boolean  @default(false)
+  fetchedAt      DateTime @default(now())
 }

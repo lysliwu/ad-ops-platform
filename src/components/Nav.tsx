@@ -14,6 +14,9 @@ const TABS = [
   { href: "/keyword-planning", label: "Keyword Planning" },
   { href: "/review-status", label: "Review Status" },
   { href: "/klook-roi", label: "ROI" },
+  { href: "/naming-audit", label: "Naming Audit" },
+  { href: "/official-site", label: "Official Site" },
+  { href: "/search-terms", label: "Search Terms" },
 ];
 
 export default function Nav() {

@@ -64,6 +64,7 @@ export default function PerformancePage() {
   const [adGroups, setAdGroups] = useState<AdGroupRow[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     fetch("/api/campaigns")
@@ -85,6 +86,13 @@ export default function PerformancePage() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaignId, days]);
+
+  async function syncGoogleAds() {
+    setSyncing(true);
+    await fetch("/api/google-ads/sync", { method: "POST" });
+    await load();
+    setSyncing(false);
+  }
 
   const allChecked = adGroups.length > 0 && selected.size === adGroups.length;
 
@@ -147,6 +155,9 @@ export default function PerformancePage() {
           </Select>
           <Button variant="ghost" onClick={load}>
             <RefreshCw size={14} /> Refresh
+          </Button>
+          <Button onClick={syncGoogleAds} disabled={syncing}>
+            <RefreshCw size={14} /> {syncing ? "Syncing…" : "Sync from Google Ads"}
           </Button>
           <Button variant="ghost" onClick={exportCsv}>
             <Download size={14} /> Export CSV

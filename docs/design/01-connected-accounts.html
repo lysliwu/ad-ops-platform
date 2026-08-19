@@ -1,0 +1,525 @@
+<title>Connected Accounts</title>
+
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface-2: #eef0f4;
+    --border: #dde1e8;
+    --ink: #14181f;
+    --ink-muted: #5c6470;
+    --ink-faint: #8991a0;
+    --accent: #2954e5;
+    --accent-soft: #e8edfd;
+    --accent-ink: #1c3aa8;
+    --ok: #1f9d66;
+    --ok-soft: #e4f6ee;
+    --warn: #c77d12;
+    --warn-soft: #fbeed9;
+    --danger: #d14343;
+    --danger-soft: #fbe6e6;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1420;
+      --surface: #131b29;
+      --surface-2: #1a2333;
+      --border: #263349;
+      --ink: #e7eaf0;
+      --ink-muted: #9aa4b8;
+      --ink-faint: #6e7890;
+      --accent: #6c8cff;
+      --accent-soft: #1c2740;
+      --accent-ink: #a9bcff;
+      --ok: #4fce9c;
+      --ok-soft: #123626;
+      --warn: #e2a447;
+      --warn-soft: #3a2c10;
+      --danger: #e8797a;
+      --danger-soft: #3a1c1e;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0d1420;
+    --surface: #131b29;
+    --surface-2: #1a2333;
+    --border: #263349;
+    --ink: #e7eaf0;
+    --ink-muted: #9aa4b8;
+    --ink-faint: #6e7890;
+    --accent: #6c8cff;
+    --accent-soft: #1c2740;
+    --accent-ink: #a9bcff;
+    --ok: #4fce9c;
+    --ok-soft: #123626;
+    --warn: #e2a447;
+    --warn-soft: #3a2c10;
+    --danger: #e8797a;
+    --danger-soft: #3a1c1e;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+  }
+
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 18px;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--warn-soft);
+    color: var(--warn);
+    border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+  }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    text-wrap: balance;
+    margin: 0 0 14px;
+  }
+
+  .dek {
+    font-size: 17px;
+    color: var(--ink-muted);
+    max-width: 62ch;
+    margin: 0 0 44px;
+  }
+
+  section {
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  section:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+  .sec-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    font-size: 21px;
+    font-weight: 650;
+    letter-spacing: -0.005em;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+
+  p { margin: 0 0 16px; max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  .lede {
+    font-size: 16.5px;
+  }
+
+  strong { font-weight: 650; color: var(--ink); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.05em 0.4em;
+  }
+
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 20px 0;
+    font-size: 15px;
+    color: var(--ink-muted);
+  }
+  .callout strong { color: var(--ink); }
+
+  figure {
+    margin: 24px 0 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    overflow-x: auto;
+  }
+
+  figure svg { display: block; min-width: 560px; width: 100%; height: auto; }
+
+  figcaption {
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .diagram-text { font-family: var(--mono); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 8px 0 4px;
+  }
+  thead th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    padding: 0 10px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td {
+    padding: 10px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.field { font-family: var(--mono); font-size: 13px; color: var(--accent-ink); white-space: nowrap; }
+  td.note { color: var(--ink-muted); }
+
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 20px 0;
+  }
+  @media (max-width: 560px) { .compare { grid-template-columns: 1fr; } }
+
+  .compare-card {
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 16px 16px 14px;
+  }
+  .compare-card.bad { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 30%, var(--border)); }
+  .compare-card.good { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 30%, var(--border)); }
+  .compare-head {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .compare-card.bad .compare-head { color: var(--danger); }
+  .compare-card.good .compare-head { color: var(--ok); }
+  .compare-card p { font-size: 14px; margin-bottom: 0; color: var(--ink); max-width: none; }
+
+  .platform-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 20px 0 4px;
+  }
+  @media (max-width: 560px) { .platform-grid { grid-template-columns: 1fr; } }
+
+  .platform-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    background: var(--surface);
+  }
+  .platform-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .platform-card p { font-size: 13.5px; color: var(--ink-muted); margin-bottom: 0; }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+</style>
+
+<div class="page">
+
+  <div class="kicker">
+    <span>LifeOS · Ad Ops Platform</span>
+    <span class="status-pill">● design draft — not yet in the codebase</span>
+  </div>
+
+  <h1>Connected Accounts</h1>
+  <p class="dek">
+    A data model that separates <strong>「誰登入了」</strong>（platform SSO, OAuth, whoever's session)
+    from <strong>「這個平台後台可以讀哪個廣告帳戶」</strong>（campaign sync). Meta 跟 TikTok 的帳戶連結體驗爛，
+    是它們的問題；只要這一層設計對了，就不會變成我們的問題。
+  </p>
+
+  <section>
+    <div class="sec-label">§01</div>
+    <h2>問題出在哪一層</h2>
+    <p class="lede">
+      「帳戶連來連去，有時候還找不到」——這句話背後通常是同一個根因：<strong>廣告帳戶的存取權，被綁在某個人的登入狀態上</strong>。
+      那個人換密碼、被登出、離職、Facebook 突然要求重新驗證，token 就跟著死掉，而且死掉的時候往往
+      沒有清楚的錯誤訊息，只是「找不到帳戶」。
+    </p>
+    <p>
+      這不是我們能修好 Meta 或 TikTok 的 SSO——那是它們的產品問題。但我們可以決定：<strong>連線這件事，
+      在踏進我們自己的系統之後，要不要繼續依賴那個脆弱的個人登入狀態</strong>。答案應該是不要。
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 900 400" role="img" aria-label="左側是四個廣告平台各自的登入與 OAuth 機制，彼此混亂且不受我們控制；右側是我們自己的 ConnectedAccount 資料模型。連線當下有一次 OAuth 交握跨越邊界，但下游的 Campaign 同步與紀錄再也不會碰回左側的平台登入狀態。">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+          </marker>
+        </defs>
+        <text x="130" y="28" text-anchor="middle" class="diagram-text" font-size="12" letter-spacing="0.06em" fill="currentColor" opacity="0.55">PER-PLATFORM IDENTITY (混亂，不受我們控制)</text>
+
+        <g fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-dasharray="4 4">
+          <rect x="20" y="42" width="220" height="150" rx="10" />
+        </g>
+
+        <g font-family="var(--mono)" font-size="12" fill="currentColor">
+          <rect x="36" y="58" width="188" height="26" rx="5" fill="none" stroke="currentColor" stroke-opacity="0.5" />
+          <text x="130" y="75" text-anchor="middle">Meta Business Login</text>
+
+          <rect x="36" y="92" width="188" height="26" rx="5" fill="none" stroke="currentColor" stroke-opacity="0.5" />
+          <text x="130" y="109" text-anchor="middle">Google Ads OAuth</text>
+
+          <rect x="36" y="126" width="188" height="26" rx="5" fill="none" stroke="currentColor" stroke-opacity="0.5" />
+          <text x="130" y="143" text-anchor="middle">TikTok Business Login</text>
+
+          <rect x="36" y="160" width="188" height="26" rx="5" fill="none" stroke="currentColor" stroke-opacity="0.5" />
+          <text x="130" y="177" text-anchor="middle">Snapchat Business Login</text>
+        </g>
+
+        <line x1="290" y1="30" x2="290" y2="370" stroke="currentColor" stroke-opacity="0.5" stroke-width="1.5" />
+        <text x="290" y="388" text-anchor="middle" class="diagram-text" font-size="11" fill="currentColor" opacity="0.55">邊界</text>
+
+        <path d="M240,117 C280,117 300,117 340,150" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow)" />
+        <text x="330" y="105" text-anchor="middle" class="diagram-text" font-size="11" fill="var(--accent)">連線當下的一次 OAuth 交握</text>
+
+        <g font-family="var(--mono)" font-size="12" fill="currentColor">
+          <rect x="330" y="150" width="150" height="34" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.6" />
+          <text x="405" y="171" text-anchor="middle">Organization</text>
+        </g>
+
+        <line x1="480" y1="167" x2="530" y2="167" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)" />
+        <text x="505" y="158" text-anchor="middle" class="diagram-text" font-size="10" fill="currentColor" opacity="0.7">owns many</text>
+
+        <g font-family="var(--mono)" font-size="12" font-weight="700" fill="var(--accent-ink)">
+          <rect x="530" y="140" width="190" height="54" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5" />
+          <text x="625" y="163" text-anchor="middle">ConnectedAccount</text>
+          <text x="625" y="180" text-anchor="middle" font-weight="400" font-size="10" opacity="0.8">platform · accountId · token</text>
+        </g>
+
+        <line x1="720" y1="160" x2="770" y2="160" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)" />
+        <text x="745" y="150" text-anchor="middle" class="diagram-text" font-size="10" fill="currentColor" opacity="0.7">syncs</text>
+
+        <g font-family="var(--mono)" font-size="12" fill="currentColor">
+          <rect x="770" y="140" width="110" height="34" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.6" />
+          <text x="825" y="161" text-anchor="middle">Campaign</text>
+        </g>
+
+        <line x1="625" y1="194" x2="625" y2="250" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arrow)" />
+        <text x="655" y="225" class="diagram-text" font-size="10" fill="currentColor" opacity="0.7">writes on every sync</text>
+
+        <g font-family="var(--mono)" font-size="12" fill="currentColor">
+          <rect x="530" y="250" width="190" height="34" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.6" />
+          <text x="625" y="271" text-anchor="middle">SyncLog</text>
+        </g>
+
+        <text x="625" y="330" text-anchor="middle" class="diagram-text" font-size="11" fill="currentColor" opacity="0.6">
+          右側完全不知道「哪個人」登入過——它只認得那個 token 還活不活
+        </text>
+        <text x="625" y="348" text-anchor="middle" class="diagram-text" font-size="11" fill="currentColor" opacity="0.6">
+          沒有任何箭頭從 Campaign / SyncLog 指回左側
+        </text>
+      </svg>
+      <figcaption>
+        混亂只發生在連線的當下（左側）。一旦 ConnectedAccount 建立，右側的所有邏輯——同步、報表、優化——
+        只讀這張表，永遠不會再回頭問「這是誰登入的」。
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="sec-label">§02</div>
+    <h2>兩種連線方式：脆弱 vs. 穩固</h2>
+    <p>
+      同一件事（讓我們的系統存取一個廣告帳戶）可以用兩種方式做到，差別在<strong>token 綁在誰身上</strong>。
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 900 340" role="img" aria-label="上半部：脆弱模式，個人登入取得的 token 綁在該員工身上，只要那個人換密碼、被登出或離職，連線就會失效並變成 needs reauth 狀態。下半部：穩固模式，管理員一次性設定 System User 或等價的長效商業層 token，此 token 綁在 Business 底下而非個人，因此不受任何個人帳戶狀態影響，維持 connected。">
+        <defs>
+          <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+          </marker>
+        </defs>
+
+        <text x="10" y="26" class="diagram-text" font-size="12" letter-spacing="0.04em" fill="var(--danger)" font-weight="700">FRAGILE — 個人登入</text>
+
+        <g font-family="var(--mono)" font-size="11.5" fill="currentColor">
+          <rect x="10" y="42" width="120" height="34" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.6" />
+          <text x="70" y="63" text-anchor="middle">員工帳號</text>
+
+          <line x1="130" y1="59" x2="180" y2="59" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow2)" />
+          <text x="155" y="50" text-anchor="middle" font-size="10" opacity="0.7">登入</text>
+
+          <rect x="180" y="42" width="150" height="34" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.6" />
+          <text x="255" y="63" text-anchor="middle">平台 OAuth</text>
+
+          <line x1="330" y1="59" x2="390" y2="59" stroke="var(--danger)" stroke-width="1.5" marker-end="url(#arrow2)" />
+          <text x="360" y="50" text-anchor="middle" font-size="9.5" fill="var(--danger)">短效個人 token</text>
+
+          <rect x="390" y="42" width="180" height="34" rx="6" fill="var(--danger-soft)" stroke="var(--danger)" stroke-width="1.5" />
+          <text x="480" y="63" text-anchor="middle">ConnectedAccount</text>
+
+          <path d="M570,59 C610,59 610,100 610,100" fill="none" stroke="var(--danger)" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arrow2)" />
+        </g>
+
+        <text x="720" y="30" class="diagram-text" font-size="10" fill="var(--danger)" opacity="0.85">壞掉時機：換密碼／登出／離職／平台要求重新驗證</text>
+        <g font-family="var(--mono)" font-size="11.5" fill="var(--danger)">
+          <rect x="600" y="82" width="140" height="34" rx="6" fill="var(--danger-soft)" stroke="var(--danger)" stroke-width="1.5" />
+          <text x="670" y="103" text-anchor="middle">needs_reauth</text>
+        </g>
+
+        <line x1="0" y1="150" x2="900" y2="150" stroke="currentColor" stroke-opacity="0.15" />
+
+        <text x="10" y="188" class="diagram-text" font-size="12" letter-spacing="0.04em" fill="var(--ok)" font-weight="700">ROBUST — Business-owned token</text>
+
+        <g font-family="var(--mono)" font-size="11.5" fill="currentColor">
+          <rect x="10" y="204" width="120" height="34" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.6" />
+          <text x="70" y="225" text-anchor="middle">管理員（一次性）</text>
+
+          <line x1="130" y1="221" x2="180" y2="221" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow2)" />
+          <text x="155" y="212" text-anchor="middle" font-size="10" opacity="0.7">設定一次</text>
+
+          <rect x="180" y="204" width="200" height="34" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.6" />
+          <text x="280" y="220" text-anchor="middle">Business Manager</text>
+          <text x="280" y="233" text-anchor="middle" font-size="9.5" opacity="0.7">System User / 長效 token</text>
+
+          <line x1="380" y1="221" x2="440" y2="221" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#arrow2)" />
+          <text x="410" y="212" text-anchor="middle" font-size="9.5" fill="var(--ok)">Business-scoped token</text>
+
+          <rect x="440" y="204" width="180" height="34" rx="6" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.5" />
+          <text x="530" y="225" text-anchor="middle">ConnectedAccount</text>
+
+          <line x1="620" y1="221" x2="680" y2="221" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#arrow2)" />
+        </g>
+
+        <g font-family="var(--mono)" font-size="11.5" fill="var(--ok)">
+          <rect x="680" y="204" width="110" height="34" rx="6" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.5" />
+          <text x="735" y="225" text-anchor="middle">connected</text>
+        </g>
+        <text x="735" y="262" text-anchor="middle" class="diagram-text" font-size="10" fill="var(--ok)" opacity="0.9">不受任何個人帳戶狀態影響</text>
+      </svg>
+      <figcaption>
+        兩條路徑做的是同一件事——讓 ConnectedAccount 拿到能讀廣告資料的 token——差別只在 token 的擁有者是
+        「某個會離職的人」還是「不會離職的 Business」。內部使用階段就該直接走下面這條路。
+      </figcaption>
+    </figure>
+
+    <div class="platform-grid">
+      <div class="platform-card">
+        <div class="platform-name">Meta</div>
+        <p>Business Manager 底下建 System User，發長效 token。需要 Business Verification，但一勞永逸。</p>
+      </div>
+      <div class="platform-card">
+        <div class="platform-name">Google Ads</div>
+        <p>用 MCC（Manager Account）+ Service Account 存取底下客戶帳戶，不綁單一 Google 個人帳號。</p>
+      </div>
+      <div class="platform-card">
+        <div class="platform-name">TikTok</div>
+        <p>App 層級申請 Advertiser 存取權，換到的 long-term access token 綁在 App，不綁登入的人。</p>
+      </div>
+      <div class="platform-card">
+        <div class="platform-name">Snapchat</div>
+        <p>Organization 層級的 OAuth app，token 綁 Organization。同樣避免個人登入依賴。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">§03</div>
+    <h2>ConnectedAccount 欄位</h2>
+    <p>這張表是整個模型唯一的「單一事實來源」——任何 campaign 資料要同步，都得先查到這張表裡狀態是 <code>connected</code> 的一列。</p>
+    <table>
+      <thead>
+        <tr><th>欄位</th><th>用途</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="field">platform</td><td class="note">google_ads / meta / tiktok / snapchat</td></tr>
+        <tr><td class="field">platformAccountId</td><td class="note">該平台上的廣告帳戶 ID（不是使用者 ID）</td></tr>
+        <tr><td class="field">authMethod</td><td class="note">system_user / service_account / oauth_user——決定穩不穩</td></tr>
+        <tr><td class="field">status</td><td class="note">connected / needs_reauth / disconnected</td></tr>
+        <tr><td class="field">accessToken / refreshToken</td><td class="note">加密存放，只在 server 端解密使用</td></tr>
+        <tr><td class="field">tokenExpiresAt</td><td class="note">System User 型 token 通常是 null（不過期）</td></tr>
+        <tr><td class="field">connectedByUserId</td><td class="note">稽核用——誰當初按下連線，不代表資料存取依賴這個人</td></tr>
+        <tr><td class="field">lastSyncedAt / lastSyncError</td><td class="note">壞掉的時候第一眼就看得到，不用去猜</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="sec-label">§04</div>
+    <h2>內部 → 外部，資料模型不用重寫</h2>
+    <p>
+      現在 <code>Organization</code> 就一筆（自己公司），所有 <code>ConnectedAccount</code> 掛在這筆底下。
+      之後要轉外部給其他 agency 用，多開幾筆 <code>Organization</code>、每個客戶登入後只看得到自己的
+      <code>ConnectedAccount</code> 跟 <code>Campaign</code>——資料表結構完全不用動，要加的是「使用者屬於哪個
+      Organization」跟登入系統。這是 Lark 那條路真正值得先做對的地方：不是為了現在的多租戶，是為了以後不用重寫。
+    </p>
+    <div class="callout">
+      <strong>現在該做的，只有這件事：</strong>把現有 Campaign 的 <code>platform</code> 字串欄位，換成指向
+      ConnectedAccount 的關聯。其他（System User 設定、多 Organization）都等真的要接平台、要對外開放時再做。
+    </div>
+  </section>
+
+  <footer>
+    設計草稿 · 尚未寫入 ad-ops-platform repo · 對應 Lysli 2026-08-15 的架構討論
+  </footer>
+
+</div>

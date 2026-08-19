@@ -1,0 +1,302 @@
+<title>Meta System User</title>
+
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface-2: #eef0f4;
+    --border: #dde1e8;
+    --ink: #14181f;
+    --ink-muted: #5c6470;
+    --ink-faint: #8991a0;
+    --accent: #2954e5;
+    --accent-soft: #e8edfd;
+    --accent-ink: #1c3aa8;
+    --ok: #1f9d66;
+    --ok-soft: #e4f6ee;
+    --warn: #c77d12;
+    --warn-soft: #fbeed9;
+    --danger: #d14343;
+    --danger-soft: #fbe6e6;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1420;
+      --surface: #131b29;
+      --surface-2: #1a2333;
+      --border: #263349;
+      --ink: #e7eaf0;
+      --ink-muted: #9aa4b8;
+      --ink-faint: #6e7890;
+      --accent: #6c8cff;
+      --accent-soft: #1c2740;
+      --accent-ink: #a9bcff;
+      --ok: #4fce9c;
+      --ok-soft: #123626;
+      --warn: #e2a447;
+      --warn-soft: #3a2c10;
+      --danger: #e8797a;
+      --danger-soft: #3a1c1e;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0d1420;
+    --surface: #131b29;
+    --surface-2: #1a2333;
+    --border: #263349;
+    --ink: #e7eaf0;
+    --ink-muted: #9aa4b8;
+    --ink-faint: #6e7890;
+    --accent: #6c8cff;
+    --accent-soft: #1c2740;
+    --accent-ink: #a9bcff;
+    --ok: #4fce9c;
+    --ok-soft: #123626;
+    --warn: #e2a447;
+    --warn-soft: #3a2c10;
+    --danger: #e8797a;
+    --danger-soft: #3a1c1e;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { max-width: 840px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  .kicker {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 18px;
+  }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+    padding: 3px 9px; border-radius: 999px;
+    background: var(--ok-soft); color: var(--ok);
+    border: 1px solid color-mix(in srgb, var(--ok) 35%, transparent);
+  }
+  .back-link { color: var(--ink-faint); text-decoration: none; border-bottom: 1px dotted var(--ink-faint); }
+
+  h1 {
+    font-family: var(--mono); font-size: clamp(28px, 4vw, 38px); font-weight: 600;
+    letter-spacing: -0.01em; line-height: 1.15; text-wrap: balance; margin: 0 0 14px;
+  }
+  .dek { font-size: 17px; color: var(--ink-muted); max-width: 62ch; margin: 0 0 44px; }
+
+  section { margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--border); }
+  section:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+  .sec-label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 8px; }
+  h2 { font-size: 21px; font-weight: 650; letter-spacing: -0.005em; margin: 0 0 14px; text-wrap: balance; }
+  h3 { font-size: 15.5px; font-weight: 650; margin: 24px 0 10px; }
+
+  p { margin: 0 0 16px; max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+  strong { font-weight: 650; color: var(--ink); }
+
+  code {
+    font-family: var(--mono); font-size: 0.88em; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 4px; padding: 0.05em 0.4em;
+  }
+
+  pre {
+    font-family: var(--mono); font-size: 13px; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;
+    overflow-x: auto; margin: 14px 0 18px; line-height: 1.55;
+  }
+  pre code { background: none; border: none; padding: 0; }
+
+  .callout {
+    background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 16px 18px; margin: 20px 0; font-size: 15px; color: var(--ink-muted);
+  }
+  .callout strong { color: var(--ink); }
+  .callout.warn { border-left-color: var(--warn); }
+  .callout.warn strong { color: var(--warn); }
+
+  .checklist { list-style: none; margin: 18px 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .checklist li {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px;
+  }
+  .checklist .num {
+    font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--accent);
+    background: var(--accent-soft); border-radius: 6px; min-width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .checklist .body { font-size: 14.5px; }
+  .checklist .body b { display: block; color: var(--ink); font-weight: 650; margin-bottom: 2px; }
+  .checklist .body span { color: var(--ink-muted); }
+
+  figure {
+    margin: 24px 0 8px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px; overflow-x: auto;
+  }
+  figure svg { display: block; min-width: 560px; width: 100%; height: auto; }
+  figcaption {
+    font-size: 13px; color: var(--ink-faint); margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed var(--border);
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0 4px; }
+  thead th {
+    text-align: left; font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--ink-faint); font-weight: 600; padding: 0 10px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.field { font-family: var(--mono); font-size: 13px; color: var(--accent-ink); white-space: nowrap; }
+  td.note { color: var(--ink-muted); }
+
+  .scope-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 4px; }
+  @media (max-width: 560px) { .scope-grid { grid-template-columns: 1fr; } }
+  .scope-card { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--surface); }
+  .scope-name { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--accent-ink); margin-bottom: 4px; }
+  .scope-card p { font-size: 13px; color: var(--ink-muted); margin: 0; }
+
+  .diagram-text { font-family: var(--mono); }
+
+  footer {
+    margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--border);
+    font-family: var(--mono); font-size: 12px; color: var(--ink-faint);
+  }
+</style>
+
+<div class="page">
+
+  <div class="kicker">
+    <span>LifeOS · Ad Ops Platform · Connected Accounts 系列 02</span>
+    <span class="status-pill">✓ 內部階段可直接照做</span>
+  </div>
+
+  <h1>Meta System User 接入設計</h1>
+  <p class="dek">
+    這份是給「內部使用」階段的實作 runbook——目標是讓 <code>ConnectedAccount</code> 拿到一個
+    <strong>綁在 Business，不綁任何一個人</strong>的 Meta token。因為只接自己公司底下的廣告帳戶，
+    這條路<strong>不需要 App Review</strong>，可以直接動手做。
+  </p>
+
+  <section>
+    <div class="sec-label">§01</div>
+    <h2>為什麼內部階段這麼簡單</h2>
+    <p>
+      Meta 的 App Review（審核那個要交 demo 影片、等好幾週的流程）只有在<strong>你的 App 要存取「不屬於你
+      自己 Business Manager」的廣告帳戶</strong>時才會被要求。只要今天串的帳戶都在自己公司的 Business Manager
+      底下，App 留在 <code>Development</code> 模式就能拿到完整權限——這就是為什麼「先做 Meta」是對的順序：
+      內部階段幾乎零阻力，之後要轉外部時，權限跟資料模型都已經是對的形狀，只差申請審核。
+    </p>
+    <div class="callout">
+      <strong>前提：</strong>你要有這個 Business Manager 的 Admin 權限，而且要接的廣告帳戶已經在裡面。
+      如果還沒有 Business Manager，先去 <code>business.facebook.com</code> 建一個。
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">§02</div>
+    <h2>建立 Meta App（如果還沒有）</h2>
+    <ol class="checklist">
+      <li><span class="num">1</span><span class="body"><b>developers.facebook.com → My Apps → Create App</b><span>類型選 <code>Business</code>，關聯到剛剛那個 Business Manager。</span></span></li>
+      <li><span class="num">2</span><span class="body"><b>加上 Marketing API 這個 Product</b><span>App Dashboard → Add Product → Marketing API → Set Up。</span></span></li>
+      <li><span class="num">3</span><span class="body"><b>記下 App ID 跟 App Secret</b><span>之後產生 / 驗證 token 都會用到，存進我們自己的環境變數，不要進 git。</span></span></li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="sec-label">§03</div>
+    <h2>建立 System User 並發 token</h2>
+    <ol class="checklist">
+      <li><span class="num">1</span><span class="body"><b>Business Settings → Users → System Users → Add</b><span>命名清楚，例如 <code>ad-ops-platform-sync</code>，角色選 Admin（要指派帳戶權限需要）。</span></span></li>
+      <li><span class="num">2</span><span class="body"><b>Assign Assets → Ad Accounts</b><span>勾選要同步的廣告帳戶，權限給 <code>Manage campaigns</code>。之後每加一個新帳戶，回這裡加勾選就好，不用重新走一次登入。</span></span></li>
+      <li><span class="num">3</span><span class="body"><b>Generate New Token</b><span>選剛剛建的 App，勾選下面的權限（scopes），按下去 token 只會顯示一次——當場存進我們系統的 <code>ConnectedAccount.accessToken</code>（加密）。</span></span></li>
+    </ol>
+
+    <h3>要勾的權限</h3>
+    <div class="scope-grid">
+      <div class="scope-card"><div class="scope-name">ads_management</div><p>讀寫廣告活動、群組、關鍵字——AI 生成關鍵字/Sitelinks 之後要靠這個寫回去。</p></div>
+      <div class="scope-card"><div class="scope-name">ads_read</div><p>讀成效數據，Performance 頁的曝光/點擊/花費同步靠這個。</p></div>
+      <div class="scope-card"><div class="scope-name">business_management</div><p>管理 Business 底下的資產（含之後外部階段要用到的 Partner 指派）。</p></div>
+      <div class="scope-card"><div class="scope-name">read_insights</div><p>Insights API，ROI 頁要拿轉換數據會用到。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">§04</div>
+    <h2>Token 怎麼存、怎麼過期</h2>
+    <p>
+      System User token 是否「永久不過期」取決於 <strong>Business Verification</strong> 有沒有完成。內部階段
+      沒完成也能用（token 效期較長但非永久），建議直接把 Business Verification 一併做掉——反正外部階段一定
+      需要，早做早好，不用之後回頭重弄一次連線。
+    </p>
+    <table>
+      <thead><tr><th>ConnectedAccount 欄位</th><th>這裡怎麼填</th></tr></thead>
+      <tbody>
+        <tr><td class="field">platform</td><td class="note"><code>meta</code></td></tr>
+        <tr><td class="field">platformAccountId</td><td class="note">廣告帳戶 ID，格式 <code>act_&lt;數字&gt;</code></td></tr>
+        <tr><td class="field">authMethod</td><td class="note"><code>system_user</code></td></tr>
+        <tr><td class="field">accessToken</td><td class="note">§03 產生的 System User token（加密存放）</td></tr>
+        <tr><td class="field">tokenExpiresAt</td><td class="note">Business 已驗證 → <code>null</code>；未驗證 → 記下 Meta 回傳的效期</td></tr>
+        <tr><td class="field">status</td><td class="note">預設 <code>connected</code>，token 打 API 回 190 錯誤代碼時轉 <code>needs_reauth</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="sec-label">§05</div>
+    <h2>同步邏輯實際打的 API</h2>
+    <p>三個端點就能餵飽現有頁面（Performance／Keyword Quality 對應的活動結構／ROI）：</p>
+    <pre><code>GET /{ad_account_id}/campaigns
+    ?fields=id,name,status,objective
+    &access_token={system_user_token}
+
+GET /{ad_account_id}/insights
+    ?fields=campaign_name,impressions,clicks,spend,ctr,cpc
+    &time_range={"since":"2026-08-01","until":"2026-08-14"}
+    &level=campaign
+    &access_token={system_user_token}
+
+GET /debug_token
+    ?input_token={system_user_token}
+    &access_token={app_id}|{app_secret}   # 定期呼叫，確認 token 還活著</code></pre>
+    <div class="callout warn">
+      <strong>Rate limit 提醒：</strong>Meta 用 Business Use Case Usage 計算額度，回應 header 裡的
+      <code>x-business-use-case-usage</code> 會告訴你還剩多少——同步排程要抓這個做 backoff，不要固定
+      每 N 分鐘硬打。
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">§06</div>
+    <h2>外部階段才要處理的事（現在不用做）</h2>
+    <p>
+      這段是為了讓你知道「以後要加什麼」，不是現在的待辦。轉外部後，客戶端不會有登入畫面——他們是在
+      <strong>自己的 Business Manager 裡把我們的 Business 加成 Partner</strong>（Business Settings → Ad
+      Accounts → Assign Partner，貼我們的 Business ID），或是直接把我們的 System User 加進他們的資產權限。
+      整個過程完全不經過任何人的 Facebook 個人登入——這就是从根本解決「帳戶連來連去找不到」的方式，而且
+      Meta 官方就是設計成這樣給 agency 用的。
+    </p>
+    <p>
+      要打開這條路，需要：<strong>App Review</strong>（<code>ads_management</code> / <code>ads_read</code> 升級到
+      Advanced Access，交使用情境說明跟 demo）、<strong>Business Verification</strong>（§04 提到的，屆時是必要
+      而非建議）、以及 ConnectedAccount 多開一個 <code>organizationId</code> 對應到不同客戶。資料模型現在就是
+      對的形狀，屆時不用重寫。
+    </p>
+  </section>
+
+  <footer>
+    設計草稿 · 尚未寫入 ad-ops-platform repo · 延續 Connected Accounts 系列 01
+  </footer>
+
+</div>
